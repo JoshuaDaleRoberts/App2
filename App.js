@@ -15,7 +15,9 @@ implement monosyllabic verbs
 const myApp = () => {
   const [isEnabled, setIsEnabled] = useState(false);
   //sets three things, isEnabled is a variable that can be referenced and setIsEnabled is a function that replaces isEnabled with its value. The useState sets the initial value of isEnabled, which is, in this state, false. 
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const toggleSwitch = () => {
+    setIsEnabled(a => !a)
+  };
   //Declares toggleSwitch as a function which toggles the value of isEnabled. Doing it through setIsEnabled updates the react virtual DOM
   const [verbText, setVerbText] = useState("Verb will go here")
   //initializes state change for verb output
@@ -25,13 +27,30 @@ const myApp = () => {
   let tenseIndex = 0;
   //initializing values, reset with the selectors, to be used in the conjugateVerb() function. 
   function conjugateVerb(){
-    const subjectArray = ["ni","u","a","tu","m","wa"]
-    let subjectToUse = subjectArray[subjectIndex]
-    const tenseArray = ["na","li","ta","me"]
-    let tenseToUse = tenseArray[tenseIndex];
-    let running = subjectToUse
-    running += tenseToUse;
-    running += verb;
+    const posSubjectArray = ["ni","u","a","tu","m","wa"]
+    const negSubjectArray = ["si", "hu","ha","hatu","ham","hawa"]
+    const posTenseArray = ["na","li","ta","me"]
+    const negTenseArray = ["","ku","ta","ja"]
+    let running = ""
+    let endsWithA = false
+    if (verb.charAt(verb.length - 1) === 'a'){ endsWithA = true}
+    if(!isEnabled){
+      //console.log("POSITIVE")
+      let subjectToUse = posSubjectArray[subjectIndex]
+      let tenseToUse = posTenseArray[tenseIndex];
+      running += subjectToUse + tenseToUse + verb
+      setVerbText(running)
+    } else {
+      //console.log('NEGATIVE')
+      let subjectToUse = negSubjectArray[subjectIndex];
+      let tenseToUse = negTenseArray[tenseIndex];
+      let tempVerb = verb; 
+      if (endsWithA) {
+        tempVerb = tempVerb.substring(0, verb.length-1) + "i"; 
+      }
+      running += subjectToUse + tenseToUse + tempVerb
+      console.log(running)
+      }
     setVerbText(running)
   }
   return (
@@ -41,10 +60,7 @@ const myApp = () => {
         <View style={styles.inline}>
           <Text>Subject:</Text>
           <Dropdown
-            onChange = {(item) => {
-              console.log(item.value)
-              subjectIndex = item.value
-            }}
+            onChange = {(item) => {subjectIndex = item.value}}
             data = {[
               {label:"Mimi", value:0},
               {label:"Wewe", value:1},
@@ -60,10 +76,7 @@ const myApp = () => {
         <View style={styles.inline}>
           <Text>Tense:</Text>
           <Dropdown
-            onChange={(item) => {
-              console.log(item.value)
-              tenseIndex = item.value; 
-            }}
+            onChange={(item) => {tenseIndex = item.value;}}
             data={[
               {label: "Present", value:0},
               {label:"Past",value:1},
@@ -76,7 +89,9 @@ const myApp = () => {
         </View>
           <View style = {styles.inline}>
             <Text>Positive</Text>
-            <Switch onValueChange={toggleSwitch} value={isEnabled}/>
+            <Switch 
+              onValueChange={toggleSwitch} 
+              value={isEnabled}/>
             <Text>Negative</Text>
           </View>
         <View style={styles.inline}>
